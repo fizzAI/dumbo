@@ -1,0 +1,38 @@
+model:
+    name_or_path: EleutherAI/pythia-70m-deduped
+
+datasets:
+    - name: Fizzarolli/20240207_chai_prize_reward_model_data-with-val
+      splits:
+          train: train
+          eval: test
+      columns:
+          text: input_text
+          label: labels
+
+task:
+    name: text_classification
+    num_labels: 2
+
+optimizer:
+    name: DecoupledAdamW # one of AdamW, DecoupledAdamW, probably others
+    learning_rate: 1e-6
+    weight_decay: 1e-8
+    epsilon: 1e-8
+
+# simplified scheduler passing because most ppl don't need multiple in their runs
+scheduler:
+    name: CosineAnnealingWithWarmupScheduler # any available in composer
+    warmup_time: 0.1dur # 10% of the total training run
+
+logger:
+    - name: WandBLogger
+      project: pythia
+      tags: [sequence_classification, chai]
+
+trainer:
+    max_duration: 2ep
+    eval_interval: 100ba
+    batch_size: 16 # automagically adjusted to fit in the GPU memory, no need to worry about microbatches or gradient accumulation individually
+    max_length: 2048
+    precision: fp32 # one of fp32, amp_fp16, amp_bf16, amp_fp8 on supported hardware

@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "dumbo"
+version = "0.1.0"
+description = ""
+authors = ["fizzAI <fizzarolli@riseup.net>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+composer = "^0.23.4"
+torch = "^2.3.1"
+transformers = "^4.42.3"
+huggingface-hub = "^0.23.4"
+datasets = "^2.20.0"
+pyyaml = "^6.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
