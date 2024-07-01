@@ -1,6 +1,8 @@
 from enum import Enum
 
 class PreservingEnum(Enum):
+    """Enum that preserves missing values"""
+
     def __init__(self, wild):
         super().__init__(self, wild)
         self._value = self._value_

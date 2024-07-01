@@ -25,10 +25,14 @@ scheduler:
     name: CosineAnnealingWithWarmupScheduler # any available in composer
     warmup_time: 0.1dur # 10% of the total training run
 
-logger:
+loggers:
     - name: WandBLogger
       project: pythia
       tags: [sequence_classification, chai]
+
+metrics:
+    - name: CrossEntropy
+    - name: MultiClassAccuracy
 
 trainer:
     max_duration: 2ep
