@@ -1,7 +1,14 @@
 from dataclasses import dataclass, field
 from composer import Time, TimeUnit
-from typing import List, Tuple
+from typing import List, Tuple, Type
 from enum import Enum
+from dataclass_wizard import YAMLWizard, DumpMixin, LoadMixin
+from dataclass_wizard.type_def import T
+from dataclass_wizard.parsers import SingleArgParser
+from dataclass_wizard.models import Extras
+from dataclass_wizard.abstractions import AbstractParser
+from dataclass_wizard.utils.typing_compat import eval_forward_ref_if_needed
+from fire import Fire
 from .utils import PreservingEnum
 
 class Tasks(Enum):
@@ -148,7 +155,7 @@ class Optimizer:
     lr: float = 5e-5
     """learning rate"""
 
-    betas: Tuple[float, float]
+    betas: Tuple[float, float] = (0.9, 0.95)
     """betas"""
 
     weight_decay: float = 0.0
@@ -158,14 +165,27 @@ class Optimizer:
     """epsilon"""
 
 @dataclass
-class Scheduler:
+class Scheduler(LoadMixin):
     """Scheduler configuration"""
 
     name: Schedulers
     """required, name of the scheduler"""
 
-    warmup_time: Time = Time(1, TimeUnit.BATCH)
+    warmup_time: Time = field(default_factory=lambda: Time(100, TimeUnit.BATCH))
     """warmup time"""
+
+    @classmethod
+    def get_parser_for_annotation(cls, ann_type: Type[T], base_cls: Type = None, extras: Extras = None) -> AbstractParser:
+        class Parser(AbstractParser):
+            def __call__(self, o) -> Type[ann_type]:
+                return ann_type.from_input(o)
+
+        ann_type = eval_forward_ref_if_needed(ann_type, base_cls)
+        
+        if issubclass(ann_type, Time):
+            return Parser(base_cls, extras, ann_type)
+        
+        return super().get_parser_for_annotation(ann_type, base_cls, extras)
 
 @dataclass
 class Logger:
@@ -182,13 +202,13 @@ class Metric:
     """required, name of the metric"""
 
 @dataclass
-class Trainer:
+class Trainer(LoadMixin):
     """Trainer configuration"""
 
-    max_duration: Time = Time(1, TimeUnit.EPOCH)
+    max_duration: Time = field(default_factory=lambda: Time(1, TimeUnit.EPOCH))
     """maximum duration"""
 
-    eval_interval: Time = Time(1, TimeUnit.EPOCH)
+    eval_interval: Time = field(default_factory=lambda: Time(1, TimeUnit.EPOCH))
     """evaluate metrics every N time units"""
 
     batch_size: int = 8
@@ -199,8 +219,21 @@ class Trainer:
 
     precision: Precisions = Precisions.FP32
 
+    @classmethod
+    def get_parser_for_annotation(cls, ann_type: Type[T], base_cls: Type = None, extras: Extras = None) -> AbstractParser:
+        class Parser(AbstractParser):
+            def __call__(self, o) -> Type[ann_type]:
+                return ann_type.from_input(o)
+
+        ann_type = eval_forward_ref_if_needed(ann_type, base_cls)
+        
+        if issubclass(ann_type, Time):
+            return Parser(base_cls, extras, ann_type)
+        
+        return super().get_parser_for_annotation(ann_type, base_cls, extras)
+
 @dataclass
-class Config:
+class Config(YAMLWizard, LoadMixin):
     """Configuration"""
 
     model: Model
@@ -219,3 +252,16 @@ class Config:
     metrics: List[Metric]
 
     trainer: Trainer
+
+def check_config_validity(path):
+    config = Config.from_yaml_file(path)
+    print(repr(config))
+    print("Seems okay lol")
+
+class Cli:
+    @staticmethod
+    def check(path):
+        check_config_validity(path)
+
+if __name__ == "__main__":
+    Fire(Cli)
