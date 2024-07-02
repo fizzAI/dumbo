@@ -5,7 +5,7 @@ Told you we were cuter than Axolotl!
 - For any configuration options that need to specify an amount of time, please refer to [Composer's documentation on their `Time` class](https://docs.mosaicml.com/projects/composer/en/stable/trainer/time.html).
 
 ## Configuration file
-Dumbo configuration files are simple YAML files. Basic examples can be found in the `examples` directory.
+Dumbo configuration files are simple YAML files. Basic examples can be found in the `examples` directory; alternatively, use `python -m dumbo.config create <config_file>` to generate a template configuration file.
 
 ## Configuration options
 The following settings are available in the configuration file:
@@ -89,4 +89,4 @@ Specifies the configuration for the trainer. It contains the following fields:
     - `fp32` (default)
     - `amp_fp16`
     - `amp_bf16`
-    - `amp_fp8` (note that this requires an Nvidia GPU from the Hopper architecture or later, as well as installation of [Transformer Engine](https://github.com/NVIDIA/TransformerEngine))
+    - `amp_fp8` (note that this requires an Nvidia GPU from Hopper or later, as well as installation of [Transformer Engine](https://github.com/NVIDIA/TransformerEngine))

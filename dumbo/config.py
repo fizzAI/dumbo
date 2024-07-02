@@ -316,10 +316,88 @@ def check_config_validity(path):
     print(repr(config))
     print("Seems okay lol")
 
+def create_default_config(path, task):
+    match Tasks(task):
+        case Tasks.TEXT_CLASSIFICATION:
+            config = Config(
+                model=Model(
+                    name_or_path="distilbert-base-uncased"
+                ),
+                datasets=[
+                    Dataset(
+                        name="imdb"
+                    )
+                ],
+                task=Task(
+                    name=Tasks.TEXT_CLASSIFICATION,
+                    num_labels=2
+                ),
+                optimizer=Optimizer(
+                    name=Optimizers.AdamW
+                ),
+                scheduler=Scheduler(
+                    name=Schedulers.CosineAnnealingWithWarmupScheduler
+                ),
+                loggers=[
+                    Logger(
+                        name=Loggers.ProgressBarLogger
+                    )
+                ],
+                metrics=[
+                    Metric(
+                        name=Metrics.CrossEntropy
+                    ),
+                    Metric(
+                        name=Metrics.MultiClassAccuracy
+                    )
+                ],
+                trainer=Trainer()
+            )
+        case Tasks.TEXT_GENERATION:
+            config = Config(
+                model=Model(
+                    name_or_path="gpt2"
+                ),
+                datasets=[
+                    Dataset(
+                        name="wikitext"
+                    )
+                ],
+                task=Task(
+                    name=Tasks.TEXT_GENERATION
+                ),
+                optimizer=Optimizer(
+                    name=Optimizers.AdamW
+                ),
+                scheduler=Scheduler(
+                    name=Schedulers.CosineAnnealingWithWarmupScheduler
+                ),
+                loggers=[
+                    Logger(
+                        name=Loggers.ProgressBarLogger
+                    )
+                ],
+                metrics=[
+                    Metric(
+                        name=Metrics.CrossEntropy
+                    )
+                ],
+                trainer=Trainer()
+            )
+        case _:
+            raise ValueError(f"Unsupported task for default config: {task}")
+
+    config.to_yaml_file(path)
+
 class Cli:
     @staticmethod
     def check(path):
         check_config_validity(path)
+    
+    @staticmethod
+    def create(path, task="text_classification"):
+        """Creates a default configuration file with basic settings."""
+        create_default_config(path, task)
 
 if __name__ == "__main__":
     Fire(Cli)
