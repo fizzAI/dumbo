@@ -2,9 +2,8 @@ from dataclasses import dataclass, field
 from composer import Time, TimeUnit
 from typing import List, Tuple, Type
 from enum import Enum
-from dataclass_wizard import YAMLWizard, DumpMixin, LoadMixin
+from dataclass_wizard import YAMLWizard, LoadMixin
 from dataclass_wizard.type_def import T
-from dataclass_wizard.parsers import SingleArgParser
 from dataclass_wizard.models import Extras
 from dataclass_wizard.abstractions import AbstractParser
 from dataclass_wizard.utils.typing_compat import eval_forward_ref_if_needed
@@ -20,6 +19,7 @@ class Tasks(Enum):
     TEXT_GENERATION = "text_generation" # causal lm
     """Text generation task"""
 
+# FIXME: composer doesn't support quantized optimizers ootb yet, but we should
 class Optimizers(PreservingEnum):
     MISSING = 0
     """Missing optimizer (attempt to load from file if found)"""
@@ -33,8 +33,26 @@ class Optimizers(PreservingEnum):
     SGD = "SGD"
     """Stochastic Gradient Descent optimizer"""
 
-    DecoupledSGD = "DecoupledSGD"
+    DecoupledSGDW = "DecoupledSGD"
     """Decoupled Stochastic Gradient Descent optimizer"""
+
+    def to_optimizer(self):
+        match self:
+            case Optimizers.AdamW:
+                from torch.optim import AdamW
+                return AdamW
+            case Optimizers.DecoupledAdamW:
+                from composer.optim import DecoupledAdamW
+                return DecoupledAdamW
+            case Optimizers.SGD:
+                from torch.optim import SGD
+                return SGD
+            case Optimizers.DecoupledSGDW:
+                from composer.optim import DecoupledSGDW
+                return DecoupledSGDW
+            case _:
+                # FIXME: allow loading from files via generic mechanism
+                raise ValueError(f"Unsupported optimizer: {self.value}")
 
 class Schedulers(PreservingEnum):
     MISSING = 0
@@ -42,6 +60,14 @@ class Schedulers(PreservingEnum):
 
     CosineAnnealingWithWarmupScheduler = "CosineAnnealingWithWarmupScheduler"
     """CosineAnnealingWithWarmupScheduler scheduler"""
+
+    def to_scheduler(self):
+        match self:
+            case Schedulers.CosineAnnealingWithWarmupScheduler:
+                from composer.optim import CosineAnnealingWithWarmupScheduler
+                return CosineAnnealingWithWarmupScheduler
+            case _:
+                raise ValueError(f"Unsupported scheduler: {self.value}")
 
 class Loggers(PreservingEnum):
     MISSING = 0
@@ -73,6 +99,38 @@ class Loggers(PreservingEnum):
 
     RemoteUploaderDownloader = "RemoteUploaderDownloader"
     """Remote uploader/downloader"""
+
+    def to_logger(self):
+        match self:
+            case Loggers.FileLogger:
+                from composer.loggers import FileLogger
+                return FileLogger
+            case Loggers.WandBLogger:
+                from composer.loggers import WandBLogger
+                return WandBLogger
+            case Loggers.MLFlowLogger:
+                from composer.loggers import MLFlowLogger
+                return MLFlowLogger
+            case Loggers.CometMLLogger:
+                from composer.loggers import CometMLLogger
+                return CometMLLogger
+            case Loggers.NeptuneLogger:
+                from composer.loggers import NeptuneLogger
+                return NeptuneLogger
+            case Loggers.ProgressBarLogger:
+                from composer.loggers import ProgressBarLogger
+                return ProgressBarLogger
+            case Loggers.TensorBoardLogger:
+                from composer.loggers import TensorBoardLogger
+                return TensorBoardLogger
+            case Loggers.InMemoryLogger:
+                from composer.loggers import InMemoryLogger
+                return InMemoryLogger
+            case Loggers.RemoteUploaderDownloader:
+                from composer.loggers import RemoteUploaderDownloader
+                return RemoteUploaderDownloader
+            case _:
+                raise ValueError(f"Unsupported logger: {self.value}")
 
 class Precisions(Enum):
     FP32 = "fp32"
