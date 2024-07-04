@@ -1,33 +1,34 @@
 model:
-    name_or_path: EleutherAI/pythia-70m-deduped
+    name_or_path: kiddothe2b/longformer-mini-1024
 
 datasets:
-    - name: Fizzarolli/20240207_chai_prize_reward_model_data-with-val
+    - name: Fizzarolli/human_stories_processed
       splits:
           train: train
           eval: test
       columns:
-          text: input_text
-          label: labels
+          text: text
+          label: label
 
 task:
     name: text_classification
     num_labels: 2
 
 optimizer:
-    name: DecoupledAdamW # one of AdamW, DecoupledAdamW, probably others
-    learning_rate: 1e-6
-    weight_decay: 1e-8
-    epsilon: 1e-8
+    name: ScheduleFreeAdamW
+    learning_rate: 2.5e-6
+    betas: [0.9, 0.999]
+    weight_decay: 5e-4
+    epsilon: 1e-10
 
 # simplified scheduler passing because most ppl don't need multiple in their runs
 scheduler:
-    name: CosineAnnealingWithWarmupScheduler # any available in composer
+    name: ConstantWithWarmupScheduler # any available in composer
     warmup_time: 0.1dur # 10% of the total training run
 
 loggers:
     - name: WandBLogger
-      project: pythia
+      project: longformer-classifier
       tags: [sequence_classification, chai]
 
 metrics:

@@ -55,7 +55,9 @@ Specifies the optimizer to use, as well as its parameters. It contains the follo
 Specifies the scheduler to use, as well as its parameters. It contains the following fields:
 
 - `name`: The name of the scheduler to use. You can select from any of the following:
+    - `ConstantWithWarmupScheduler`
     - `CosineAnnealingWithWarmupScheduler`
+    - `LinearWithWarmupScheduler`
 - `warmup_time` (optional): The amount of time to warm up for. (defaults to `100ba`)
 
 ### `loggers`

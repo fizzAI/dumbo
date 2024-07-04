@@ -20,3 +20,5 @@ class PreservingEnum(Enum):
         res = cls(0)
         res.value = value
         return res
+    
+VERSION = "0.0.1"

@@ -79,6 +79,9 @@ class Schedulers(PreservingEnum):
     MISSING = 0
     """Missing optimizer (attempt to load from file if found)"""
 
+    ConstantWithWarmupScheduler = "ConstantWithWarmupScheduler"
+    """ConstantWithWarmupScheduler scheduler"""
+
     CosineAnnealingWithWarmupScheduler = "CosineAnnealingWithWarmupScheduler"
     """CosineAnnealingWithWarmupScheduler scheduler"""
 
@@ -87,6 +90,9 @@ class Schedulers(PreservingEnum):
 
     def to_scheduler(self):
         match self:
+            case Schedulers.ConstantWithWarmupScheduler:
+                from composer.optim import ConstantWithWarmupScheduler
+                return ConstantWithWarmupScheduler
             case Schedulers.CosineAnnealingWithWarmupScheduler:
                 from composer.optim import CosineAnnealingWithWarmupScheduler
                 return CosineAnnealingWithWarmupScheduler
