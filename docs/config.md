@@ -43,6 +43,9 @@ Specifies the optimizer to use, as well as its parameters. It contains the follo
     - `DecoupledAdamW` (refer to [Composer's documentation](https://docs.mosaicml.com/projects/composer/en/stable/api_reference/generated/composer.optim.DecoupledAdamW.html) for more details on this method)
     - `SGD`
     - `DecoupledSGDW` (refer to [Composer's documentation](https://docs.mosaicml.com/projects/composer/en/stable/api_reference/generated/composer.optim.DecoupledSGDW.html) for more details on this method)
+    - `ScheduleFreeAdamW` (refer to [Defazio et. al, 2024](https://arxiv.org/abs/2405.15682); use a constant LR scheduler with this)
+    - `ScheduleFreeSGD` (refer to [Defazio et. al, 2024](https://arxiv.org/abs/2405.15682); use a constant LR scheduler with this)
+    - `CAME` (refer to [Luo et. al, 2020](https://arxiv.org/abs/2307.02047))
 - `learning_rate` (optional): The learning rate to use. (defaults to `5e-5`)
 - `weight_decay` (optional): The weight decay to use. (defaults to `0.0`)
 - `betas` (optional): The betas to use. (defaults to `(0.9, 0.95)`; only applicable to AdamW-like optimizers)

@@ -36,6 +36,18 @@ class Optimizers(PreservingEnum):
     DecoupledSGDW = "DecoupledSGD"
     """Decoupled Stochastic Gradient Descent optimizer"""
 
+    ScheduleFreeAdamW = "ScheduleFreeAdamW"
+    """## EXPERIMENTAL
+    Schedule-free AdamW optimizer (refer to [Defazio et. al, 2024](https://arxiv.org/abs/2405.15682); use a constant LR scheduler with this)"""
+
+    ScheduleFreeSGD = "ScheduleFreeSGD"
+    """## EXPERIMENTAL
+    Schedule-free Stochastic Gradient Descent optimizer (refer to [Defazio et. al, 2024](https://arxiv.org/abs/2405.15682); use a constant LR scheduler with this)"""
+
+    CAME = "CAME"
+    """## EXPERIMENTAL
+    CAME optimizer (refer to [Luo et. al, 2023](https://arxiv.org/abs/2307.02047))"""
+
     def to_optimizer(self):
         match self:
             case Optimizers.AdamW:
@@ -50,6 +62,15 @@ class Optimizers(PreservingEnum):
             case Optimizers.DecoupledSGDW:
                 from composer.optim import DecoupledSGDW
                 return DecoupledSGDW
+            case Optimizers.ScheduleFreeAdamW:
+                from schedulefree.adamw_schedulefree import AdamWScheduleFree
+                return AdamWScheduleFree
+            case Optimizers.ScheduleFreeSGD:
+                from schedulefree.sgd_schedulefree import SGDScheduleFree
+                return SGDScheduleFree
+            case Optimizers.CAME:
+                from came_pytorch import CAME
+                return CAME
             case _:
                 # FIXME: allow loading from files via generic mechanism
                 raise ValueError(f"Unsupported optimizer: {self.value}")
@@ -61,11 +82,17 @@ class Schedulers(PreservingEnum):
     CosineAnnealingWithWarmupScheduler = "CosineAnnealingWithWarmupScheduler"
     """CosineAnnealingWithWarmupScheduler scheduler"""
 
+    LinearWithWarmupScheduler = "LinearWithWarmupScheduler"
+    """LinearWithWarmupScheduler scheduler"""
+
     def to_scheduler(self):
         match self:
             case Schedulers.CosineAnnealingWithWarmupScheduler:
                 from composer.optim import CosineAnnealingWithWarmupScheduler
                 return CosineAnnealingWithWarmupScheduler
+            case Schedulers.LinearWithWarmupScheduler:
+                from composer.optim import LinearWithWarmupScheduler
+                return LinearWithWarmupScheduler
             case _:
                 raise ValueError(f"Unsupported scheduler: {self.value}")
 
